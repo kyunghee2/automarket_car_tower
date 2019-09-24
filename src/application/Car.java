@@ -3,6 +3,15 @@ package application;
 public class Car {
 	private String carid;
 	private String carnm;
+	
+	public Car() {
+		super();
+	}
+	public Car(String carid, String carnm) {
+		super();
+		this.carid = carid;
+		this.carnm = carnm;
+	}
 	public String getCarid() {
 		return carid;
 	}

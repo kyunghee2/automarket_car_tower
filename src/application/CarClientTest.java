@@ -23,7 +23,7 @@ import javafx.stage.Stage;
 public class CarClientTest extends Application{
 	TextArea textarea;
 	Button connBtn, disConnBtn;//서버접속, 접속끊기 버튼
-	TextField idTf, msgTf; //아이디 입력칸, 메시지 입력칸
+	TextField msgTf; //메시지 입력칸
 	
 	Socket socket;
 	BufferedReader br ;
@@ -104,8 +104,8 @@ public class CarClientTest extends Application{
 		flowpane.setPrefSize(700, 50);
 		//flowpane에 버튼 추가
 		
-		idTf = new TextField();
-		idTf.setPrefSize(100, 50);
+//		idTf = new TextField();
+//		idTf.setPrefSize(100, 50);
 		
 		msgTf = new TextField();
 		msgTf.setPrefSize(200, 50);
@@ -120,7 +120,7 @@ public class CarClientTest extends Application{
 		
 		flowpane.getChildren().add(connBtn);
 		flowpane.getChildren().add(disConnBtn);
-		flowpane.getChildren().add(idTf);
+//		flowpane.getChildren().add(idTf);
 		flowpane.getChildren().add(msgTf);
 		root.setBottom(flowpane);
 		

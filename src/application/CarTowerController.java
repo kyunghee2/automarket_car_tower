@@ -18,6 +18,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -40,20 +44,49 @@ public class CarTowerController implements Initializable{
 	ExecutorService executorService = Executors.newCachedThreadPool(); 
 	SharedObject sharedObject = new SharedObject();
 	
+	private ObservableList<Car> lvCarData = FXCollections.observableArrayList();
+	private ObservableList<User> lvUserData = FXCollections.observableArrayList();
+	
+	private String selected_carid;
 	class SharedObject {
 		List<ClientRunnable> clients = new ArrayList<ClientRunnable>();	
-		List<User> users = new ArrayList<User>();
-		List<Car> cars = new ArrayList<Car>();
+		List<ClientRunnable> users = new ArrayList<ClientRunnable>();
+		List<ClientRunnable> cars = new ArrayList<ClientRunnable>();
 		ObjectMapper objectMapper = new ObjectMapper();
 		
 		public SharedObject(){}
-		public synchronized void broadcast(String msg) {
+		public void broadcast(String msg) {
 			
 			clients.stream().forEach(t-> {
 				t.out.println(msg);
 				t.out.flush();
 			});
 			
+		}
+		//차량등록
+		public synchronized void carAdd(ClientRunnable runnable) {
+			boolean exists =false;
+			for(ClientRunnable c: cars) {
+				if(c.id==runnable.id && c.type==runnable.type) {
+					exists=true;
+				}
+			}
+			if(!exists)
+			cars.add(runnable);
+		}
+		//해당차량 메시지 전송
+		public void carSendMsg(String carid,String msg) {
+			
+//			cars.stream().filter(t->t.id==carid).forEach(f->{
+//				f.out.println(msg);
+//				f.out.flush();
+//			});
+			for(ClientRunnable r : cars) {
+				if(r.id.equals(carid)) {
+					r.out.println(msg);
+					r.out.flush();
+				}
+			}
 		}
 				
 	}
@@ -62,13 +95,13 @@ public class CarTowerController implements Initializable{
 		private Socket socket; //클라이언트와 연결된 socket
 		private BufferedReader br;
 		private PrintWriter out;		
-		private Integer idx;
+		private String id;
+		private String type;
 		
 		public ClientRunnable(SharedObject sharedObject, Socket socket) {
 			super();
 			this.sharedObject = sharedObject;
 			this.socket = socket;
-			this.idx = sharedObject.clients.size();
 			try {
 				this.br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				this.out = new PrintWriter(socket.getOutputStream());
@@ -80,31 +113,55 @@ public class CarTowerController implements Initializable{
 		
 		@Override
 		public void run() {
-			String msg = "",carid="";
+			String msg = "",carid="",userid="";
 			String[] arr_msg;
 			try {
 				while((msg = br.readLine())!=null){
-					if(msg.equals("/EXIT/")) {
+					
+					if(msg.contains("/EXIT/")) {
 						if(!Thread.currentThread().isInterrupted())
 							Thread.currentThread().interrupt();
 						
 						break;
 					}
-					else if(msg.equals("/10000000/")) {
-						//web -> tower 회수요청
+					else if(msg.contains("/10000000/")) {						
 						arr_msg = msg.split("/");
 						carid = arr_msg[2];	
-						printMsg("web -> tower 회수요청 carid:"+carid);
+						printMsg("car 차량등록 carid:"+carid);
+						this.id=carid;
+						sharedObject.carAdd(this);
 						
+						String tcarid=carid;
+						currentThread(()->{							
+							//lvCarData.clear();								
+							lvCarData.add(new Car(tcarid,tcarid));
+							
+						});
 					}
-					else if(msg.equals("/10000001/")) {
-						//car -> tower 목적지 도착
+					else if(msg.contains("/10000001/")) {
 						arr_msg = msg.split("/");
 						carid = arr_msg[2];	
-						printMsg("car -> tower 목적지 도착 carid:"+carid);
-						
+						printMsg("tower->car 차량회수 요청 carid:"+carid);
+												
+						sharedObject.carSendMsg(carid,"C/10000001/"+carid);
 					}
-					sharedObject.broadcast(msg);
+					else if(msg.contains("/10000002/")) {
+						arr_msg = msg.split("/");
+						carid = arr_msg[2];	
+						printMsg("car -> tower 회수처리완료 carid:"+carid);
+					}
+					else if(msg.contains("/10000100/")) {
+						arr_msg = msg.split("/");
+						userid = arr_msg[2];	
+						printMsg("app -> tower 사용자 등록 userid:"+userid);
+					}
+					else if(msg.contains("10000101")) {
+						printMsg("app -> tower 자동차선정 userid:"+userid);
+					}
+					else if(msg.contains("10000102")) {
+						printMsg("app -> tower 자동차이동요청 userid:"+userid);
+					}
+					//sharedObject.broadcast(msg);
 					
 				}
 			}catch(Exception e) {
@@ -117,6 +174,9 @@ public class CarTowerController implements Initializable{
 		Platform.runLater(()->{
 			textarea.appendText(msg+"\n");
 		});
+	}
+	private void currentThread(Runnable runnable) {
+		Platform.runLater(runnable);
 	}
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -137,7 +197,6 @@ public class CarTowerController implements Initializable{
 							printMsg("[클라이언트 접속 성공]");
 							
 							ClientRunnable cRunnable = new ClientRunnable(sharedObject, socket);
-													
 							sharedObject.clients.add(cRunnable);
 							printMsg("[현재 클라이언트 수:]"+sharedObject.clients.size());
 							executorService.execute(cRunnable);
@@ -156,6 +215,18 @@ public class CarTowerController implements Initializable{
 		btnServerStop.setOnAction(e->{
 			
 		});
+		
+		lvCar.setItems(lvCarData);
+    	lvCar.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Car>() {
+    	    @Override
+    	    public void changed(ObservableValue<? extends Car> observable, Car oldValue, Car newValue) {
+    	    	selected_carid = newValue.getCarid().toString();
+    	    }
+    	});
+    	
+    	
 	}
 	
 }
+
+

@@ -24,6 +24,11 @@
   destlong=#{destlong}
   WHERE carid=#{carid}
   </update>
-  
+  <update id="setCarStatus" parameterType="hashMap">
+  UPDATE Car
+  SET carstatus=#{carstatus},
+  moddate=SYSDATE
+  WHERE carid=#{carid}
+  </update>
  
 </mapper>

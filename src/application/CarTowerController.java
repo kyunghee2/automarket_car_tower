@@ -8,8 +8,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,7 +51,7 @@ public class CarTowerController implements Initializable{
 	private ObservableList<Car> lvCarData = FXCollections.observableArrayList();
 	private ObservableList<User> lvUserData = FXCollections.observableArrayList();
 	
-	private String selected_carid;
+	//private String selected_carid,selected_userid;
 	class SharedObject {
 		List<ClientRunnable> clients = new ArrayList<ClientRunnable>();	
 		List<ClientRunnable> users = new ArrayList<ClientRunnable>();
@@ -65,7 +67,7 @@ public class CarTowerController implements Initializable{
 			});
 			
 		}
-		//차량등록
+		//차량 소겟저장
 		public synchronized void carAdd(ClientRunnable runnable) {
 			boolean exists =false;
 			for(ClientRunnable c: cars) {
@@ -90,7 +92,7 @@ public class CarTowerController implements Initializable{
 //				}
 //			}
 		}
-		//사용자등록
+		//사용자 소켓저장
 		public synchronized void userAdd(ClientRunnable runnable) {
 			boolean exists =false;
 			for(ClientRunnable c: users) {
@@ -172,7 +174,7 @@ public class CarTowerController implements Initializable{
 					else if(msg.contains("/10000002/")) {
 						arr_msg = msg.split("/");
 						carid = arr_msg[2];	
-						printMsg("car -> tower 회수처리완료 carid:"+carid);
+						printMsg("car -> tower 회수처리 완료 carid:"+carid);
 					}
 					else if(msg.contains("/10000100/")) {
 						arr_msg = msg.split("/");
@@ -190,14 +192,29 @@ public class CarTowerController implements Initializable{
 					else if(msg.contains("10000101")) {
 						arr_msg = msg.split("/");
 						userid = arr_msg[2];	
-						printMsg("app -> tower 자동차선정 userid:"+userid);
+						printMsg("app -> tower 자동차 선정 userid:"+userid);
 						CarService service = new CarService();
 						CarVO vo = service.getCarSel();
 						
 						sharedObject.userSendMsg(userid,"/10000101/"+vo.getCarId());
 					}
 					else if(msg.contains("10000102")) {
-						printMsg("app -> tower 자동차이동요청 userid:"+userid);
+						arr_msg = msg.split("/");
+						if(arr_msg.length<4) {
+							printMsg("app -> tower 자동차 이동요청 :형식이 맞지 않습니다.예)U/10000102/UserId/CarId");
+							printMsg("arr_msg:"+arr_msg);
+							
+						}else {
+							userid = arr_msg[2];
+							carid = arr_msg[3];
+							CarService service = new CarService();
+							HashMap<String,Object> map =new HashMap<String,Object>();
+							map.put("carid", carid);
+							map.put("carstatus", "01");
+							int result = service.setCarStatus(map);
+							printMsg("app -> tower 자동차 이동요청 userid:"+userid+" carid:"+carid+" result:"+result);
+						}
+						
 					}
 					//sharedObject.broadcast(msg);
 					
@@ -258,7 +275,7 @@ public class CarTowerController implements Initializable{
     	lvCar.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Car>() {
     	    @Override
     	    public void changed(ObservableValue<? extends Car> observable, Car oldValue, Car newValue) {
-    	    	selected_carid = newValue.getCarid().toString();
+    	    	//selected_carid = newValue.getCarid().toString();
     	    }
     	});
     	lvUser.setItems(lvUserData);

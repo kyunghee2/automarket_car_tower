@@ -4,7 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.session.SqlSession;
 
 import application.mappers.CarMapper;
@@ -36,6 +39,16 @@ public class CarService {
 			sqlSession.close();
 		}
 
+	}
+	public int setCarStatus(HashMap<String, Object> map) {
+		SqlSession sqlSession = MyBatisUtil.getSqlSessionFactory().openSession();
+		try {
+			CarMapper carMapper = sqlSession.getMapper(CarMapper.class);
+			return carMapper.setCarStatus(map);
+
+		} finally {
+			sqlSession.close();
+		}
 	}
 
 }

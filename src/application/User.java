@@ -3,6 +3,15 @@ package application;
 public class User {
 	private String userid;
 	private String usernm;
+	
+	public User() {
+		super();
+	}
+	public User(String userid, String usernm) {
+		super();
+		this.userid = userid;
+		this.usernm = usernm;
+	}
 	public String getUserid() {
 		return userid;
 	}

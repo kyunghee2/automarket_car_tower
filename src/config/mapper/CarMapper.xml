@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+  'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+ 
+<mapper namespace='application.mappers.CarMapper'>
+ 
+  <resultMap type='application.vo.CarVO' id='CarResult'>
+    <id property='carId' column='carId'/>
+    <result property='carStatus' column='carStatus'/>
+    <result property='destLati' column='destLati'/>  
+    <result property='destLong' column='destLong'/>  
+   </resultMap>
+ 
+  <select id='getAllCars' resultMap='CarResult'>
+   SELECT * FROM Car
+  </select>
+  <select id="getCarSel" resultType="carvo">
+  SELECT carid FROM Car
+   WHERE carStatus='00' or carStatus is null and rownum = 1
+  </select>
+  <update id="setCarLocation">
+  UPDATE Car
+  SET destlati=#{destlati},
+  destlong=#{destlong}
+  WHERE carid=#{carid}
+  </update>
+  
+ 
+</mapper>

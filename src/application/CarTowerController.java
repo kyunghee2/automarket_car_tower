@@ -17,6 +17,8 @@ import java.util.concurrent.Executors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import application.service.CarService;
+import application.vo.CarVO;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -72,21 +74,41 @@ public class CarTowerController implements Initializable{
 				}
 			}
 			if(!exists)
-			cars.add(runnable);
+				cars.add(runnable);
 		}
-		//해당차량 메시지 전송
+		//해당차량에 메시지 전송
 		public void carSendMsg(String carid,String msg) {
 			
-//			cars.stream().filter(t->t.id==carid).forEach(f->{
-//				f.out.println(msg);
-//				f.out.flush();
-//			});
-			for(ClientRunnable r : cars) {
-				if(r.id.equals(carid)) {
-					r.out.println(msg);
-					r.out.flush();
+			cars.stream().filter(t->t.id.equals(carid)).forEach(f->{
+				f.out.println(msg);
+				f.out.flush();
+			});
+//			for(ClientRunnable r : cars) {
+//				if(r.id.equals(carid)) {
+//					r.out.println(msg);
+//					r.out.flush();
+//				}
+//			}
+		}
+		//사용자등록
+		public synchronized void userAdd(ClientRunnable runnable) {
+			boolean exists =false;
+			for(ClientRunnable c: users) {
+				if(c.id==runnable.id && c.type==runnable.type) {
+					exists=true;
 				}
 			}
+			if(!exists)
+				users.add(runnable);
+		}
+		//해당 사용자에게 메세지 전송
+		public void userSendMsg(String userid,String msg) {
+			
+			users.stream().filter(t->t.id.equals(userid)).forEach(f->{
+				f.out.println(msg);
+				f.out.flush();
+			});
+
 		}
 				
 	}
@@ -127,8 +149,9 @@ public class CarTowerController implements Initializable{
 					else if(msg.contains("/10000000/")) {						
 						arr_msg = msg.split("/");
 						carid = arr_msg[2];	
-						printMsg("car 차량등록 carid:"+carid);
+						
 						this.id=carid;
+						this.type="C";
 						sharedObject.carAdd(this);
 						
 						String tcarid=carid;
@@ -137,13 +160,14 @@ public class CarTowerController implements Initializable{
 							lvCarData.add(new Car(tcarid,tcarid));
 							
 						});
+						printMsg("car 차량등록 carid:"+carid);
 					}
 					else if(msg.contains("/10000001/")) {
 						arr_msg = msg.split("/");
 						carid = arr_msg[2];	
 						printMsg("tower->car 차량회수 요청 carid:"+carid);
 												
-						sharedObject.carSendMsg(carid,"C/10000001/"+carid);
+						sharedObject.carSendMsg(carid,"/10000001/"+carid);
 					}
 					else if(msg.contains("/10000002/")) {
 						arr_msg = msg.split("/");
@@ -153,10 +177,24 @@ public class CarTowerController implements Initializable{
 					else if(msg.contains("/10000100/")) {
 						arr_msg = msg.split("/");
 						userid = arr_msg[2];	
+						this.id=userid;
+						this.type="U";
+						sharedObject.userAdd(this);
+						
+						String tuserid=userid;
+						currentThread(()->{										
+							lvUserData.add(new User(tuserid,tuserid));							
+						});
 						printMsg("app -> tower 사용자 등록 userid:"+userid);
 					}
 					else if(msg.contains("10000101")) {
+						arr_msg = msg.split("/");
+						userid = arr_msg[2];	
 						printMsg("app -> tower 자동차선정 userid:"+userid);
+						CarService service = new CarService();
+						CarVO vo = service.getCarSel();
+						
+						sharedObject.userSendMsg(userid,"/10000101/"+vo.getCarId());
 					}
 					else if(msg.contains("10000102")) {
 						printMsg("app -> tower 자동차이동요청 userid:"+userid);
@@ -223,7 +261,13 @@ public class CarTowerController implements Initializable{
     	    	selected_carid = newValue.getCarid().toString();
     	    }
     	});
-    	
+    	lvUser.setItems(lvUserData);
+    	lvUser.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<User>() {
+    	    @Override
+    	    public void changed(ObservableValue<? extends User> observable, User oldValue, User newValue) {
+    	    	//selected_userid = newValue.getUserid().toString();
+    	    }
+    	});
     	
 	}
 	

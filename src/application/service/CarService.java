@@ -40,6 +40,7 @@ public class CarService {
 		}
 
 	}
+
 	public int setCarStatus(HashMap<String, Object> map) {
 		SqlSession sqlSession = MyBatisUtil.getSqlSessionFactory().openSession();
 		try {
@@ -47,6 +48,7 @@ public class CarService {
 			return carMapper.setCarStatus(map);
 
 		} finally {
+			sqlSession.commit();
 			sqlSession.close();
 		}
 	}

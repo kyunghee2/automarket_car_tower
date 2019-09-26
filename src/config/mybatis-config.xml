@@ -4,6 +4,9 @@
   'http://mybatis.org/dtd/mybatis-3-config.dtd'>
 <configuration>
  <properties resource='config/jdbc.properties'/>
+  <settings>
+    <setting name="logImpl" value="LOG4J"/>
+  </settings>
  <typeAliases>
   <typeAlias type='application.vo.CarVO' alias='carvo'></typeAlias>
  </typeAliases>
@@ -20,5 +23,6 @@
   </environments>
   <mappers>
  <mapper resource='config/mapper/CarMapper.xml'/>
-  </mappers>
+  </mappers>  
+  
 </configuration>

@@ -12,4 +12,5 @@ public interface CarMapper {
 	public CarVO getCarSel();
 	
 	public int setCarStatus(HashMap<String, Object> map);
+	//public int setCarStatus(CarVO map);
 }

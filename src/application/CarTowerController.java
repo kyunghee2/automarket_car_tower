@@ -187,6 +187,7 @@ public class CarTowerController implements Initializable{
 						this.id=carid;
 						this.type="C";
 						sharedObject.carAdd(this);
+						sharedObject.clients.remove(this);
 						
 						String tcarid=carid;
 						currentThread(()->{							
@@ -205,8 +206,14 @@ public class CarTowerController implements Initializable{
 					}
 					else if(msg.contains("/10000002/")) {
 						arr_msg = msg.split("/");
-						carid = arr_msg[2];	
-						printMsg("car -> tower 회수처리 완료 carid:"+carid);
+						carid = arr_msg[2];
+						CarService service = new CarService();
+						HashMap<String,Object> map =new HashMap<String,Object>();
+						map.put("carid", carid);
+						map.put("carstatus", "04");
+						int result = service.setCarStatus(map);
+								
+						printMsg("car -> tower 회수처리 완료 carid:"+carid+" result:"+result);
 					}
 					else if(msg.contains("/10000100/")) {
 						arr_msg = msg.split("/");
@@ -214,6 +221,7 @@ public class CarTowerController implements Initializable{
 						this.id=userid;
 						this.type="U";
 						sharedObject.userAdd(this);
+						sharedObject.clients.remove(this);
 						
 						String tuserid=userid;
 						currentThread(()->{										

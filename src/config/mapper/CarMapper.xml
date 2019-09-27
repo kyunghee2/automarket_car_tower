@@ -12,11 +12,13 @@
    </resultMap>
  
   <select id='getAllCars' resultMap='CarResult'>
-   SELECT * FROM Car
+   SELECT carId,carStatus,nvl(destLati,0) destLati,nvl(destLong,0) destLong  
+	FROM Car
+	WHERE carStatus='00'
   </select>
   <select id="getCarSel" resultType="carvo">
   SELECT carid FROM Car
-   WHERE carStatus='00' or carStatus is null and rownum = 1
+   WHERE carStatus='00' and rownum = 1
   </select>
   <update id="setCarLocation">
   UPDATE Car

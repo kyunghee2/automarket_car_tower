@@ -309,7 +309,8 @@ public class CarTowerController implements Initializable{
 							
 							ClientRunnable cRunnable = new ClientRunnable(sharedObject, socket);
 							sharedObject.clients.add(cRunnable);
-							printMsg("[현재 클라이언트 수:]"+sharedObject.clients.size());
+							printMsg("[현재 클라이언트 수]:"+sharedObject.clients.size());							
+							printMsg("Car:"+sharedObject.cars.size()+" User:"+sharedObject.users.size());
 							executorService.execute(cRunnable);
 							
 						}

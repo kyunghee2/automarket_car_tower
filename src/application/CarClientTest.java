@@ -57,8 +57,9 @@ public class CarClientTest extends Application{
 				while((line=br.readLine())!=null) {
 					printMsg(line);
 				}
+				printMsg("서버 연결해제");
 			}catch(Exception e) {
-				
+				e.getStackTrace();
 			}
 		}
 		

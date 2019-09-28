@@ -88,7 +88,7 @@ public class CarTowerController implements Initializable{
 		public synchronized void carAdd(ClientRunnable runnable) {
 			boolean exists =false;
 			for(ClientRunnable c: cars) {
-				if(c.id==runnable.id && c.type==runnable.type) {
+				if(c.id.equals(runnable.id) && c.type.equals(runnable.type)) {
 					exists=true;
 				}
 			}
@@ -105,30 +105,29 @@ public class CarTowerController implements Initializable{
 
 		}
 		//사용자 접속해제
-		public void userDisconnect(String userid) {			
+		public synchronized void userDisconnect(String userid) {			
 			int index=-1,i=0;
 			for(ClientRunnable c: users) {
-				if(c.id==userid ) {
+				if(c.id.equals(userid) ) {
 					index = i;
 				}
 				i++;
 			}			
-			lvUser.getItems().remove(index);
-			users.remove(index);
+			
 			users.stream().filter(f->f.id.equals(userid)).forEach(t->{
 				//소켓연결해제				
-				if(t.socket.isConnected()) {					
-					t.socket.isClosed();
-				}
+				t.currentExit();
 				
-			});			
+			});		
+			users.remove(index);
+			lvUser.getItems().remove(index);
 		
 		}
 		//사용자 소켓저장
 		public synchronized void userAdd(ClientRunnable runnable) {
 			boolean exists =false;
 			for(ClientRunnable c: users) {
-				if(c.id==runnable.id && c.type==runnable.type) {
+				if(c.id.equals(runnable.id) && c.type.equals(runnable.type)) {
 					exists=true;
 				}
 			}
@@ -163,7 +162,7 @@ public class CarTowerController implements Initializable{
 				this.out = new PrintWriter(socket.getOutputStream());
 				
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println(e.getStackTrace());
 			}
 		}
 		
@@ -175,8 +174,7 @@ public class CarTowerController implements Initializable{
 				while((msg = br.readLine())!=null){
 					
 					if(msg.contains("/EXIT/")) {
-						if(!Thread.currentThread().isInterrupted())
-							Thread.currentThread().interrupt();
+						currentExit();
 						
 						break;
 					}
@@ -275,9 +273,25 @@ public class CarTowerController implements Initializable{
 					//sharedObject.broadcast(msg);
 					
 				}
-			}catch(Exception e) {
-				System.out.println(e);
 			}
+			catch(IOException e) {
+				printMsg("연결해제 userid:"+this.id+" type:"+this.type);
+				
+			}
+			catch(Exception e) {
+				System.out.println(e.getStackTrace());
+			}
+		}
+		public void currentExit() {
+			printMsg("연결해제 userid:"+this.id+" type:"+this.type);
+			try {
+				br.close();
+				socket.close();
+			} catch (IOException e) {
+				System.out.println(e.getStackTrace());
+			}			
+			if(!Thread.currentThread().isInterrupted())
+				Thread.currentThread().interrupt();
 		}
 		
 	}
@@ -317,7 +331,7 @@ public class CarTowerController implements Initializable{
 						
 						
 					}catch(Exception e) {
-						e.getStackTrace();
+						System.out.println(e.getStackTrace());
 					}
 				}				
 			};
@@ -325,6 +339,9 @@ public class CarTowerController implements Initializable{
 			
 		});
 		btnServerStop.setOnAction(e->{
+			try {
+				server.close();
+			}catch(IOException ex) {}
 			executorService.shutdownNow();
 		});
 		btnRecovery.setOnAction(e->{
@@ -365,6 +382,7 @@ public class CarTowerController implements Initializable{
     	});
     	lvUser.setItems(lvUserData);
     	lvUser.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<User>() {
+    		
     	    @Override
     	    public void changed(ObservableValue<? extends User> observable, User oldValue, User newValue) {
     	    	selected_userid = newValue.getUserid().toString();

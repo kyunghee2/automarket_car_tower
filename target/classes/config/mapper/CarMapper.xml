@@ -12,9 +12,9 @@
    </resultMap>
  
   <select id='getAllCars' resultMap='CarResult'>
-   SELECT carId,carStatus,nvl(destLati,0) destLati,nvl(destLong,0) destLong  
+   SELECT carId,carStatus,nvl(destLati,0.0) destLati,nvl(destLong,0.0) destLong  
 	FROM Car
-	WHERE carStatus='00'
+	WHERE carStatus IN ('00','04') ,
   </select>
   <select id="getCarSel" resultType="carvo">
   SELECT carid FROM Car

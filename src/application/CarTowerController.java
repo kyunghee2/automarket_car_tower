@@ -283,8 +283,10 @@ public class CarTowerController implements Initializable {
 							
 							//CarService service = new CarService();
 							CarVO vo = service.getCarSel(carLati,carLong);
-
-							sharedObject.userSendMsg(userid, "/10000101/" + vo.getCarId());
+							if(vo == null)
+								sharedObject.userSendMsg(userid, "/10000101/-1");
+							else
+								sharedObject.userSendMsg(userid, "/10000101/" + vo.getCarId());
 							printMsg("app -> tower 자동차 선정 userid:" + userid);
 						}						
 						
@@ -353,20 +355,10 @@ public class CarTowerController implements Initializable {
 							json = arr_msg[3];
 							CarDetail cardetail = objectMapper.readValue(json, new TypeReference<CarDetail>() {});
 							cardetail.setCarid(carid);
-							// DB저장
-//							CarVO vo = new CarVO();
-//							vo.setCarId(cardetail.getCarid());
-//							vo.setCarStart(cardetail.getStartflag());
-//							vo.setCarStatus(cardetail.getCarstatus());
-//							vo.setDestLati(cardetail.getLatitude());
-//							vo.setDestLong(cardetail.getLongitude());
-//							vo.setTemp(cardetail.getTemp());
-//							vo.setBattery(cardetail.getBattery());
-//							vo.setCarError(cardetail.getError());							
+							// DB저장					
 							int result = service.setCarInsert(cardetail);
 							
 							// TABLE VIEW 표시
-							//String tcarid = carid;
 							int findidx = -1, i = 0;
 							for (CarDetail c : lvCarDetailData) {
 								if (c.getCarid().equals(carid)) {

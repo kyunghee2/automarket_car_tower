@@ -19,13 +19,13 @@
             </Label>
             <Button fx:id="btnServerStart" layoutX="14.0" layoutY="390.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="220.0" text="서버시작" />
             <Button fx:id="btnServerStop" layoutX="244.0" layoutY="390.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="230.0" text="서버중지" />
-            <ListView fx:id="lvCar" layoutX="482.0" layoutY="254.0" prefHeight="117.0" prefWidth="233.0" />
+            <ListView fx:id="lvCar" layoutX="482.0" layoutY="254.0" prefHeight="117.0" prefWidth="239.0" />
             <Label layoutX="482.0" layoutY="231.0" text="접속 Car 목록" />
             <Label layoutX="481.0" layoutY="37.0" text="접속 User" />
             <ListView fx:id="lvUser" layoutX="480.0" layoutY="56.0" prefHeight="139.0" prefWidth="244.0" />
-            <Button fx:id="btnRecovery" layoutX="620.0" layoutY="380.0" mnemonicParsing="false" text="회수요청" />
-            <Button fx:id="btnUserDisc" layoutX="593.0" layoutY="205.0" mnemonicParsing="false" text="User접속해제" />
-            <TableView fx:id="tableCarDetail" layoutX="16.0" layoutY="443.0" prefHeight="200.0" prefWidth="698.0">
+            <Button fx:id="btnRecovery" layoutX="657.0" layoutY="379.0" mnemonicParsing="false" text="회수요청" />
+            <Button fx:id="btnUserDisc" layoutX="633.0" layoutY="203.0" mnemonicParsing="false" text="User접속해제" />
+            <TableView fx:id="tableCarDetail" layoutX="16.0" layoutY="443.0" prefHeight="200.0" prefWidth="705.0">
               <columns>
                 <TableColumn prefWidth="75.0" text="Id" />
                 <TableColumn prefWidth="75.0" text="상태" />

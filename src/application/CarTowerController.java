@@ -190,7 +190,8 @@ public class CarTowerController implements Initializable {
 			Double carLati=0.0,carLong=0.0;
 			String[] arr_msg;
 			ObjectMapper objectMapper = new ObjectMapper();
-
+			CarService service = new CarService();
+			
 			try {
 				while ((msg = br.readLine()) != null) {
 
@@ -240,7 +241,7 @@ public class CarTowerController implements Initializable {
 
 						} else {
 							carid = arr_msg[2];
-							CarService service = new CarService();
+							//CarService service = new CarService();
 							HashMap<String, Object> map = new HashMap<String, Object>();
 							map.put("carid", carid);
 							map.put("carstatus", "04");
@@ -280,7 +281,7 @@ public class CarTowerController implements Initializable {
 							carLati = Double.parseDouble(arr_msg[3]);
 							carLong = Double.parseDouble(arr_msg[4]);
 							
-							CarService service = new CarService();
+							//CarService service = new CarService();
 							CarVO vo = service.getCarSel(carLati,carLong);
 
 							sharedObject.userSendMsg(userid, "/10000101/" + vo.getCarId());
@@ -296,7 +297,7 @@ public class CarTowerController implements Initializable {
 						} else {
 							userid = arr_msg[2];
 							carid = arr_msg[3];
-							CarService service = new CarService();
+							//CarService service = new CarService();
 							HashMap<String, Object> map = new HashMap<String, Object>();
 							map.put("carid", carid);
 							map.put("carstatus", "01");
@@ -312,7 +313,7 @@ public class CarTowerController implements Initializable {
 
 						} else {
 							carid = arr_msg[2];
-							CarService service = new CarService();
+							//CarService service = new CarService();
 							HashMap<String, Object> map = new HashMap<String, Object>();
 							map.put("carid", carid);
 							map.put("carstatus", "02");
@@ -331,7 +332,7 @@ public class CarTowerController implements Initializable {
 						} else {
 							userid = arr_msg[2];
 							carid = arr_msg[3];
-							CarService service = new CarService();
+							//CarService service = new CarService();
 							HashMap<String, Object> map = new HashMap<String, Object>();
 							map.put("carid", carid);
 							map.put("carstatus", "00");
@@ -350,13 +351,22 @@ public class CarTowerController implements Initializable {
 						} else {
 							carid = arr_msg[2];
 							json = arr_msg[3];
-							CarDetail cardetail = objectMapper.readValue(json, new TypeReference<CarDetail>() {
-							});
+							CarDetail cardetail = objectMapper.readValue(json, new TypeReference<CarDetail>() {});
 							cardetail.setCarid(carid);
 							// DB저장
+//							CarVO vo = new CarVO();
+//							vo.setCarId(cardetail.getCarid());
+//							vo.setCarStart(cardetail.getStartflag());
+//							vo.setCarStatus(cardetail.getCarstatus());
+//							vo.setDestLati(cardetail.getLatitude());
+//							vo.setDestLong(cardetail.getLongitude());
+//							vo.setTemp(cardetail.getTemp());
+//							vo.setBattery(cardetail.getBattery());
+//							vo.setCarError(cardetail.getError());							
+							int result = service.setCarInsert(cardetail);
 							
 							// TABLE VIEW 표시
-							String tcarid = carid;
+							//String tcarid = carid;
 							int findidx = -1, i = 0;
 							for (CarDetail c : lvCarDetailData) {
 								if (c.getCarid().equals(carid)) {
@@ -369,7 +379,7 @@ public class CarTowerController implements Initializable {
 							else
 								lvCarDetailData.set(findidx, cardetail);
 
-							printMsg("car -> tower 차량정보 저장 요청");
+							printMsg("car -> tower 차량정보 저장 요청 result:"+result);
 
 						}
 

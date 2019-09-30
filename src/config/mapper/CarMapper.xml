@@ -4,14 +4,14 @@
  
 <mapper namespace='application.mappers.CarMapper'>
  
-  <resultMap type='application.vo.CarVO' id='CarResult'>
+  <resultMap type='application.vo.CarVO' id='carResult'>
     <id property='carId' column='carId'/>
     <result property='carStatus' column='carStatus'/>
     <result property='destLati' column='destLati'/>  
     <result property='destLong' column='destLong'/>  
    </resultMap>
  
-  <select id='getAllCars' resultMap='CarResult'>
+  <select id='getAllCars' resultMap='carResult'>
    SELECT carId,carStatus,nvl(destLati,0.0) destLati,nvl(destLong,0.0) destLong  
 	FROM Car
 	WHERE carStatus IN ('00','04') ,
@@ -32,5 +32,31 @@
   moddate=SYSDATE
   WHERE carid=#{carid}
   </update>
+  <update id="setCarUpdate" parameterType="cardetail">
+  UPDATE Car
+  SET 
+  DestLati=#{latitude}, 
+  DestLong=#{longitude}, 
+  Temp=#{temp}, 
+  Battery=#{battery}, 
+  CarStart=#{startflag}, 
+  CarError=#{error}, 
+  ModDate=SYSDATE
+  WHERE carid=#{carid}
+  </update>
+  <insert id="setCarLogInsert" parameterType="cardetail">
+  INSERT INTO CarLog
+(carlogseq, CARID, TEMP, BATTERY, CARLATI, CARLONG, CARERROR)
+SELECT
+CARLOG_SEQ.NEXTVAL,
+#{carid},
+#{temp},
+#{battery},
+#{latitude},
+#{longitude},
+#{error}
+FROM DUAL
+  
+  </insert>
  
 </mapper>

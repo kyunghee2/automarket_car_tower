@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 
+import application.CarDetail;
 import application.mappers.CarMapper;
 //import util.JDBCUtil;
 import application.vo.CarVO;
@@ -38,7 +39,7 @@ public class CarService {
 			CarMapper carMapper = sqlSession.getMapper(CarMapper.class);
 			
 			List<CarVO> list = carMapper.getAllCars();
-			Double carLati=0.0,carLong=0.0,distance=0.0;
+			Double carLati=0.0,carLong=0.0;
 			for(CarVO c: list) {
 				carLati = c.getDestLati();
 				carLong = c.getDestLong();
@@ -65,6 +66,25 @@ public class CarService {
 			sqlSession.commit();
 			sqlSession.close();
 		}
+	}
+	public int setCarInsert(CarDetail map) {
+		SqlSession sqlSession = MyBatisUtil.getSqlSessionFactory().openSession();
+		int result = 0;
+		try {
+			CarMapper carMapper = sqlSession.getMapper(CarMapper.class);
+			carMapper.setCarUpdate(map);
+			
+			result= carMapper.setCarLogInsert(map);
+
+		}catch(Exception e) {
+			System.out.println(e);
+			sqlSession.rollback();
+		}
+		finally {
+			sqlSession.commit();
+			sqlSession.close();
+		}
+		return result;
 	}
 
 }

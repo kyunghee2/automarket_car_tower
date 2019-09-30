@@ -2,7 +2,7 @@ package application;
 
 public class CarDetail {
 	private String carid;
-	private Boolean startflag;
+	private String startflag;
 	private Integer battery;
 	private Integer temp;
 	private String carstatus;
@@ -14,7 +14,7 @@ public class CarDetail {
 		super();
 	}
 
-	public CarDetail(String carid, Boolean startflag, Integer battery, Integer temp, String carstatus, Double latitude,
+	public CarDetail(String carid, String startflag, Integer battery, Integer temp, String carstatus, Double latitude,
 			Double longitude, String error) {
 		super();
 		this.carid = carid;
@@ -35,11 +35,11 @@ public class CarDetail {
 		this.carid = carid;
 	}
 
-	public Boolean getStartflag() {
+	public String getStartflag() {
 		return startflag;
 	}
 
-	public void setStartflag(Boolean startflag) {
+	public void setStartflag(String startflag) {
 		this.startflag = startflag;
 	}
 

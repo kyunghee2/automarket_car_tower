@@ -9,6 +9,7 @@
   </settings>
  <typeAliases>
   <typeAlias type='application.vo.CarVO' alias='carvo'></typeAlias>
+  <typeAlias type='application.CarDetail' alias='cardetail'></typeAlias>
  </typeAliases>
  <environments default='development'>
   <environment id='development'>

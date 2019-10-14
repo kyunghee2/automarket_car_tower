@@ -303,7 +303,7 @@ public class CarTowerController implements Initializable {
 								sharedObject.userSendMsg(userid, "/10000101/-1");
 							else
 								sharedObject.userSendMsg(userid, "/10000101/" + vo.getCarId());
-							printMsg("app -> tower 자동차 선정 userid:" + userid);
+							printMsg("app -> tower 자동차 선정 userid:" + userid+" carid:"+vo.getCarId());
 						}						
 						
 					} else if (msg.contains("/10000102/")) {

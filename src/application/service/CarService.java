@@ -33,7 +33,8 @@ public class CarService {
 	}
 	//차량선택
 	public CarVO getCarSel(Double targetLati,Double targetLong) {
-				
+			
+		CarVO returnVO;
 		SqlSession sqlSession = MyBatisUtil.getSqlSessionFactory().openSession();
 		try {
 			CarMapper carMapper = sqlSession.getMapper(CarMapper.class);
@@ -45,14 +46,13 @@ public class CarService {
 				carLong = c.getDestLong();
 				c.setDistance(LocationUtil.distance(targetLati,targetLong,carLati,carLong,"meter"));
 			}
-			Comparator<CarVO> comparator = Comparator.comparingDouble( CarVO::getDistance );
-			CarVO returnVO = list.stream().sorted().min(comparator).get();
-			return returnVO;
-			//return carMapper.getCarSel();
+			
+			returnVO = list.stream().min(Comparator.comparing(CarVO::getDistance)).get();
 
 		} finally {
 			sqlSession.close();
 		}
+		return returnVO;
 
 	}
 

@@ -84,6 +84,7 @@ public class CarTowerController implements Initializable {
 		List<ClientRunnable> clients = new ArrayList<ClientRunnable>();
 		List<ClientRunnable> users = new ArrayList<ClientRunnable>();
 		List<ClientRunnable> cars = new ArrayList<ClientRunnable>();
+		List<ClientRunnable> car_tablets = new ArrayList<ClientRunnable>();
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		public SharedObject() {
@@ -96,7 +97,15 @@ public class CarTowerController implements Initializable {
 			});
 
 		}
-
+		// 차량 테블릿 소겟저장
+		public synchronized void carTabletAdd(ClientRunnable runnable) {
+			
+			long cnt = car_tablets.stream().filter(f->f.id.equals(runnable.id)&&f.type.equals(runnable.type)).count();
+			if (cnt == 0) {
+				car_tablets.add(runnable);
+			}
+				
+		}
 		// 차량 소겟저장
 		public synchronized void carAdd(ClientRunnable runnable) {
 			boolean exists = false;
@@ -186,7 +195,7 @@ public class CarTowerController implements Initializable {
 
 		@Override
 		public void run() {
-			String msg = "", carid = "", userid = "", json = "";
+			String msg = "", carid = "", userid = "", json = "", ttype="";
 			Double carLati=0.0,carLong=0.0;
 			String[] arr_msg;
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -199,7 +208,7 @@ public class CarTowerController implements Initializable {
 						currentExit();
 
 						break;
-					} else if (msg.contains("/10000000/")) {
+					}else if (msg.contains("/10000000/")) {
 						arr_msg = msg.split("/");
 						if (arr_msg.length < 3) {
 							printMsg("car 차량등록 :형식이 맞지 않습니다.예)C/10000000/CarId");
@@ -207,17 +216,24 @@ public class CarTowerController implements Initializable {
 
 						} else {
 							carid = arr_msg[2];
-
+							ttype = arr_msg[0];
+							
 							this.id = carid;
-							this.type = "C";
-							sharedObject.carAdd(this);
+							this.type = ttype;
+							if(ttype.equals("C")) {
+								sharedObject.carAdd(this);
+								String tcarid = carid;
+								currentThread(() -> {
+									lvCarData.add(new Car(tcarid, tcarid));
+								});
+								printMsg("car 차량등록 carid:" + carid);
+								
+							}else if(ttype.equals("T")) {
+								sharedObject.carTabletAdd(this);
+								printMsg("car Tablet 등록 carid:" + carid);
+							}							
 							sharedObject.clients.remove(this);
 
-							String tcarid = carid;
-							currentThread(() -> {
-								lvCarData.add(new Car(tcarid, tcarid));
-							});
-							printMsg("car 차량등록 carid:" + carid);
 						}
 						
 					} else if (msg.contains("/10000001/")) {
@@ -392,6 +408,15 @@ public class CarTowerController implements Initializable {
 			try {
 				br.close();
 				socket.close();
+				
+				if(this.type.equals("U")) {
+					sharedObject.users.removeIf(t->t.id.equals(this.id)&&t.type.equals(this.type));
+				}else if(this.type.equals("C")) {
+					sharedObject.cars.removeIf(t->t.id.equals(this.id)&&t.type.equals(this.type));
+				}else if(this.type.equals("T")) {
+					sharedObject.users.removeIf(t->t.id.equals(this.id)&&t.type.equals(this.type));
+				}				
+				
 			} catch (IOException e) {
 				System.out.println(e.getStackTrace());
 			}

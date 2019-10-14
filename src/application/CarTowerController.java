@@ -108,14 +108,15 @@ public class CarTowerController implements Initializable {
 		}
 		// 차량 소겟저장
 		public synchronized void carAdd(ClientRunnable runnable) {
-			boolean exists = false;
-			for (ClientRunnable c : cars) {
-				if (c.id.equals(runnable.id) && c.type.equals(runnable.type)) {
-					exists = true;
-				}
-			}
-			if (!exists)
+			
+			long cnt = cars.stream().filter(f->f.id.equals(runnable.id)&&f.type.equals(runnable.type)).count();
+			if (cnt == 0) {
 				cars.add(runnable);
+				currentThread(() -> {
+					lvCarData.add(new Car(runnable.id, runnable.id));
+				});
+			}
+				
 		}
 
 		// 해당차량에 메시지 전송
@@ -150,14 +151,16 @@ public class CarTowerController implements Initializable {
 
 		// 사용자 소켓저장
 		public synchronized void userAdd(ClientRunnable runnable) {
-			boolean exists = false;
-			for (ClientRunnable c : users) {
-				if (c.id.equals(runnable.id) && c.type.equals(runnable.type)) {
-					exists = true;
-				}
-			}
-			if (!exists)
+			
+			long cnt = users.stream().filter(f->f.id.equals(runnable.id)&&f.type.equals(runnable.type)).count();
+			if (cnt == 0) {
 				users.add(runnable);
+				
+				currentThread(() -> {
+					lvUserData.add(new User(runnable.id, runnable.id));
+				});
+			}
+			
 		}
 
 		// 해당 사용자에게 메세지 전송
@@ -222,10 +225,7 @@ public class CarTowerController implements Initializable {
 							this.type = ttype;
 							if(ttype.equals("C")) {
 								sharedObject.carAdd(this);
-								String tcarid = carid;
-								currentThread(() -> {
-									lvCarData.add(new Car(tcarid, tcarid));
-								});
+
 								printMsg("car 차량등록 carid:" + carid);
 								
 							}else if(ttype.equals("T")) {
@@ -279,10 +279,6 @@ public class CarTowerController implements Initializable {
 							sharedObject.userAdd(this);
 							sharedObject.clients.remove(this);
 
-							String tuserid = userid;
-							currentThread(() -> {
-								lvUserData.add(new User(tuserid, tuserid));
-							});
 							printMsg("app -> tower 사용자 등록 userid:" + userid);
 						}
 						
@@ -302,7 +298,7 @@ public class CarTowerController implements Initializable {
 							if(vo == null)
 								sharedObject.userSendMsg(userid, "/10000101/-1");
 							else
-								sharedObject.userSendMsg(userid, "/10000101/" + vo.getCarId());
+								sharedObject.userSendMsg(userid, "/10000101/" + vo.getCarId()+"/"+vo.getDestLati()+"/"+vo.getDestLong());
 							printMsg("app -> tower 자동차 선정 userid:" + userid+" carid:"+vo.getCarId());
 						}						
 						
@@ -392,7 +388,7 @@ public class CarTowerController implements Initializable {
 						}
 
 					}
-					// sharedObject.broadcast(msg);
+					
 
 				}
 			} catch (IOException e) {
